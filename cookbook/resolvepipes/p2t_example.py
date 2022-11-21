@@ -1,4 +1,4 @@
-import submitex.pipetex2tex as p2t
+import submitex.resolvepipes as p2t
 
 tex = "There's \inp{|python -c 'print(int(24*60*60*365.25))'} seconds in a year."
 print("source:", tex)
