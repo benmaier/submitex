@@ -1,0 +1,2 @@
+default:
+	collectfloats test.tex

@@ -1,5 +1,5 @@
 default:
-	replacefigs figures
+	replacefigs figs
 
 prefix:
 	cat figures.tex | replacefigs --figprefix figure_
