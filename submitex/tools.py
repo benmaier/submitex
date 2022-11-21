@@ -1,3 +1,6 @@
+"""
+Helper functions to deal with latex source.
+"""
 
 def match_is_comment(text,match):
     """
@@ -66,6 +69,34 @@ def iterate_matches(text,pattern,skip_comments=True,pos=0,endpos=922337203685477
         yield match
 
 def search_pattern_and_replace(text,pattern,replacement,skip_comments=True,pos=0,endpos=922337203685477):
+    """
+    A bit like re.sub. Search for a pattern (per
+    default: a pattern that is not uncommented),
+    and replace it with `replacement`, which can
+    be a function that takes the match as an input.
+
+    Parameters
+    ==========
+    text : str
+        The text (latex source) that is being scanned
+    pattern : re.Pattern
+        Search the text for all occurences of this pattern
+    replacement : str or function
+        What to replace the pattern with. If callable,
+        the function will be passed the found match.
+    skip_comments : bool, default = True
+        Whether or not to skip matches that are commented out
+    pos : int, default = 0
+        Where to start searching.
+    endpos : int, default = 922337203685477
+        Where to stop searching.
+
+    Yields
+    ======
+    newtext : str
+        The updated text string.
+    """
+
     while True:
         match = pattern.search(text,pos=pos,endpos=endpos)
         if match is None:
@@ -81,8 +112,10 @@ def search_pattern_and_replace(text,pattern,replacement,skip_comments=True,pos=0
         else:
             repl = replacement
         text = before + repl + after
-        pos = len(before) + len(repl) - len(match.group())
+        pos = len(before) + len(repl)
         endpos += len(repl) - len(match.group())
+        #print("XXX",text[pos-20:pos],"XXX")
+        #print(pos)
 
 
     return text
