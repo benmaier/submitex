@@ -14,45 +14,29 @@ from submitex.tools import (
         search_pattern_and_replace,
     )
 
+from pathlib import Path
+
 def convert(tex,bib):
 
     # delete \bibliographystyle{...}
     pattern_style = re.compile(r'\\bibliographystyle{.*}')
-    pos = 0
-    newtex = str(tex)
-    while True:
-        match = pattern_style.search(newtex,pos=pos)
-        if match is None:
-            break
-        if match_is_comment(newtex,match):
-            pos = match.span()[1]
-            continue
-        start, end = match.span()
-        before = newtex[:start]
-        after = newtex[end:]
-        newtex = before + after
+    tex = search_pattern_and_replace(tex, pattern_style, '')
 
+    # replace \bibliography{} with the text in parameter `bib`
     pattern_bib = re.compile(r'\\bibliography{.*}')
-    pos = 0
-    while True:
-        match = pattern_bib.search(newtex,pos=pos)
-        if match is None:
-            break
-        if match_is_comment(newtex,match):
-            pos = match.span()[1]
-            continue
+    tex = search_pattern_and_replace(tex, pattern_bib, bib)
 
-        start, end = match.span()
-        before = newtex[:start]
-        after = newtex[end:]
-        newtex = before + bib + after
-        pos = len(before)+len(bib)
-
-    return newtex
+    return tex
 
 def cli():
 
     parser = get_default_parser()
+    parser.add_argument('-b','--bib',
+                        type=str,
+                        default=None,
+                        help="We'll try to deduce a bib-file from the passed filename of the TeX-source, "+\
+                             "but in case the bib-file is named differently, you can provided it here"
+                        )
     args = get_parsed_args(parser)
 
     if args.filename is not None:
@@ -63,10 +47,19 @@ def cli():
 
     fn = args.filename
 
-    with open(fn+'.bbl','r',encoding=args.encoding) as f:
+    if args.bib is not None:
+        fn_bib = args.bib
+    else:
+        fn_bib = fn
+
+    if not Path(fn_bib).exists():
+        fn_bib = fn + '.bbl'
+
+    with open(fn_bib,'r',encoding=args.enc) as f:
         bib = f.read()
 
-    with open(fn+'.tex','r',encoding=args.encoding) as f:
+
+    with open(fn+'.tex','r',encoding=args.enc) as f:
         tex = f.read()
 
     converted = convert(tex,bib)

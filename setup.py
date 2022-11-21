@@ -39,6 +39,7 @@ setup(
     entry_points = {
           'console_scripts': [
                   'pipetex2tex = submitex.pipetex2tex:cli',
+                  'replacebib = submitex.replacebib:cli',
               ],
         },
     include_package_data=True,

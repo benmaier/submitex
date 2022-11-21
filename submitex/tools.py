@@ -68,15 +68,17 @@ def search_pattern_and_replace(text,pattern,replacement,skip_comments=True):
         match = pattern.search(text,pos=pos)
         if match is None:
             break
-        pos = match.span()[1]
-        if skip_comments match_is_comment(newtex,match):
+        if skip_comments and match_is_comment(text,match):
+            pos = match.span()[1]
             continue
         start, end = match.span()
-        before = newtex[:start]
-        after = newtex[end:]
-        newtex = before + after
+        before = text[:start]
+        after = text[end:]
+        text = before + replacement + after
+        pos = len(before) + len(replacement)
 
-    return newtex
+
+    return text
 
 
 if __name__=="__main__":

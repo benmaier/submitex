@@ -17,6 +17,7 @@ def get_default_parser():
     parser.add_argument('filename', type=str, nargs='?',
                         help='Files to convert',default=None)
     parser.add_argument('-e','--enc',
+                        type=str,
                         default='utf8',
                         help='encoding')
 
