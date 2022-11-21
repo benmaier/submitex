@@ -19,11 +19,11 @@ from pathlib import Path
 def convert(tex,bib):
 
     # delete \bibliographystyle{...}
-    pattern_style = re.compile(r'\\bibliographystyle{.*}')
+    pattern_style = re.compile(r'\\bibliographystyle{.*?}')
     tex = search_pattern_and_replace(tex, pattern_style, '')
 
     # replace \bibliography{} with the text in parameter `bib`
-    pattern_bib = re.compile(r'\\bibliography{.*}')
+    pattern_bib = re.compile(r'\\bibliography{.*?}')
     tex = search_pattern_and_replace(tex, pattern_bib, bib)
 
     return tex

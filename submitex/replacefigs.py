@@ -22,11 +22,11 @@ from math import log10
 
 def get_next_figure_range(tex,pos):
 
-    begin_figure = re.compile(r'\\begin{figure}')
+    begin_figure = re.compile(r'\\begin\s*{\s*figure\s*?}')
     match_begin = begin_figure.search(tex,pos=pos)
     if match_begin is None:
         return None
-    end_figure = re.compile(r'\\end{figure}')
+    end_figure = re.compile(r'\\end\s*{\s*figure\s*?}')
     match_end = end_figure.search(tex,pos=match_begin.span()[-1])
     if match_end is None:
         return None
@@ -42,7 +42,6 @@ def iterate_includegraphics_in_figure(tex,pos,endpos,fig_str):
     fig_paths = []
     added_chars = 0
     while True:
-        print(pos, endpos)
         #print(tex[pos:pos+10])
         match = includegraphics_pattern.search(tex,pos=pos,endpos=endpos)
         if match is None:
@@ -89,7 +88,7 @@ def _count_occ(tex,pattern):
     return len([*iterate_matches(tex, pattern)])
 
 def _count_figures(tex):
-    pattern = re.compile(r'\\begin{figure}')
+    pattern = re.compile(r'\\begin\s*{\s*figure\s*?}')
     return _count_occ(tex, pattern)
 
 def _count_includegraphics(tex):
@@ -173,7 +172,7 @@ if __name__ == "__main__":
         print(s, t)
 
 
-    print(_count_figures(r"\begin{figure}\end{figure}  \n   \begin{figure} %\begin{figure}"))
+    print(_count_figures(r"\begin {figure } \end{figure}  \n   \begin{figure} %\begin{figure}"))
 
     newtex, figpaths = convert_and_get_figure_paths(r"""
             \begin{figure}
