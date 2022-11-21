@@ -28,7 +28,7 @@ def match_is_comment(text,match):
 
     return text[pointer] == '%'
 
-def iterate_matches(text,pattern,skip_comments=True):
+def iterate_matches(text,pattern,skip_comments=True,pos=0,endpos=9223372036854775807):
     """
     Iterate through all matches of a text, given a pattern.
 
@@ -40,6 +40,10 @@ def iterate_matches(text,pattern,skip_comments=True):
         Search the text for all occurences of this pattern
     skip_comments : bool, default = True
         Whether or not to skip matches that are commented out
+    pos : int, default = 0
+        Where to start searching.
+    endpos : int, default = 9223372036854775807
+        Where to stop searching.
 
     Yields
     ======
@@ -47,10 +51,9 @@ def iterate_matches(text,pattern,skip_comments=True):
         The next match
     """
 
-    pos = 0
     while True:
 
-        match = pattern.search(text,pos=pos)
+        match = pattern.search(text,pos=pos,endpos=endpos)
 
         if match is None:
             break
@@ -62,10 +65,9 @@ def iterate_matches(text,pattern,skip_comments=True):
 
         yield match
 
-def search_pattern_and_replace(text,pattern,replacement,skip_comments=True):
-    pos = 0
+def search_pattern_and_replace(text,pattern,replacement,skip_comments=True,pos=0,endpos=922337203685477):
     while True:
-        match = pattern.search(text,pos=pos)
+        match = pattern.search(text,pos=pos,endpos=endpos)
         if match is None:
             break
         if skip_comments and match_is_comment(text,match):
@@ -74,8 +76,13 @@ def search_pattern_and_replace(text,pattern,replacement,skip_comments=True):
         start, end = match.span()
         before = text[:start]
         after = text[end:]
-        text = before + replacement + after
-        pos = len(before) + len(replacement)
+        if callable(replacement):
+            repl = replacement(match)
+        else:
+            repl = replacement
+        text = before + repl + after
+        pos = len(before) + len(repl) - len(match.group())
+        endpos += len(repl) - len(match.group())
 
 
     return text
