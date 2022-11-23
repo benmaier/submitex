@@ -75,8 +75,11 @@ def iterate_includegraphics_in_figure(tex,pos,endpos,fig_str):
             this_fig = fig_str
         if source.suffix != '':
             this_fig += source.suffix
-        fig_paths.append((str(source), this_fig))
-        repl = incl + '{' + this_fig + '}' + ' % original file: '+str(source) + '\n'
+        if str(source) != this_fig:
+            fig_paths.append((str(source), this_fig))
+            repl = incl + '{' + this_fig + '}' + ' % original file: '+str(source) + '\n'
+        else:
+            repl = s
         added_chars += len(repl)
 
         diff = len(repl) - len(s)
