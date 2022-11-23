@@ -1,8 +1,15 @@
 submitex
 ========
 
-Provides tools and CLIs to automatically convert your LaTeX-project into
-a structure in which it can be easily submitted to a journal.
+Python tools and CLIs to automatically convert your LaTeX-project into a
+structure in which it can be easily submitted to a journal.
+
+For instance for ``manuscript.tex`` with bibtex-generated
+``manuscript.bbl``:
+
+.. code:: bash
+
+   replacebib manuscript | replacefigs | collectfloats | resolveinputs | resolvepipes > newmanuscript.tex
 
 Install
 -------
@@ -24,8 +31,8 @@ Modules/CLIs
 Functionality is given by functions in the respective
 ``submitex.modulename``, e.g. ``submitex.replacefigs``.
 
-The same modulename can used to evoke the functionality from the command
-line.
+The same modulename can be used to evoke the functionality from the
+command line.
 
 +---------------------------------+------------------------------------+
 | module/CLI                      | description                        |
@@ -52,7 +59,7 @@ line.
 | resolveinputs                   | Replace ``\input{filename}`` with  |
 |                                 | the content of ``filename``        |
 +---------------------------------+------------------------------------+
-| resolvepipes                    | Replace ``\input{|command}`` with  |
+| resolvepipes                    | Replace ``\input{\|command}`` with |
 |                                 | the output of the process          |
 |                                 | ``command``                        |
 +---------------------------------+------------------------------------+
