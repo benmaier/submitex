@@ -189,7 +189,11 @@ An exception is `replacebib` which needs another file to work. Typically, the fi
 
 the procedure assumes that both `oldmanuscript.tex` and `oldmanuscript.bbl` exist in the cwd. Alternatively, provided it explicitly with the `--bib` flag. Then you can pipe. For instance
 
-    cat oldmanuscript.tex | replacebib -b otherbibfile.bbl > newmanuscript
+    cat oldmanuscript.tex | replacebib -b otherbibfile.bbl > newmanuscript.tex
+
+Note that that means you can pipe several or all of the commands together, for instance like so:
+
+    replacebib manuscript | replacefigs | collectfloats | resolveinputs | resolvepipes > newmanuscript.tex
 
 #### replacefigs
 
