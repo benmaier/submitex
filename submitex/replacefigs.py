@@ -1,3 +1,9 @@
+"""
+Functions to find all "figure"- and
+"includegraphics"-environments and replace the listed
+files with generic filenames that are on cwd-level.
+"""
+
 import sys
 import re
 import shutil
@@ -75,9 +81,8 @@ def iterate_includegraphics_in_figure(tex,pos,endpos,fig_str):
 
         diff = len(repl) - len(s)
         tex = before + repl + after
-        pos = len(before) + diff
+        pos = len(before) + len(repl)
         endpos += diff
-        print(tex[endpos-20:endpos])
         i += 1
 
 
@@ -116,7 +121,7 @@ def convert_and_get_figure_paths(tex,figure_prefix='Fig'):
 
     return tex, fig_paths
 
-def clone_figures(fig_paths,fileendings=['.pdf','.png','.eps','.jpg'],debug=False):
+def clone_figures(fig_paths,fileendings=['.pdf','.png','.eps','.jpg','.jpeg'],debug=False):
 
     debug_out = []
 
@@ -145,17 +150,23 @@ def clone_figures(fig_paths,fileendings=['.pdf','.png','.eps','.jpg'],debug=Fals
 
 def cli():
 
-    parser = get_default_parser()
-    parser.add_argument('-d','--dont-copy-figs',
+    description = 'Rename all figure files in the `\includegraphics`-environment to generic enumerated names and copy the respective files with the new names to top-level.'
+    parser = get_default_parser(description)
+    parser.add_argument('-d','--dontcopyfigs',
                         action='store_true',
                         default=False,
                         help='Per default, the figures that are found will be copied to the current '\
                              "working directory, but you can turn that off with this flag.")
+    parser.add_argument('-F','--figprefix',
+                        type=str,
+                        default='Fig',
+                        help='The prefix for the renamed figures (default: "Fig", such that Fig01, Fig02, ...)')
     args = get_parsed_args(parser)
     tex = parse_input(args)
 
-    converted, fig_paths = convert(tex,bib)
-    clone_figures(fig_paths)
+    converted, fig_paths = convert_and_get_figure_paths(tex,figure_prefix=args.figprefix)
+    if not args.dontcopyfigs:
+        clone_figures(fig_paths)
     write_output(converted)
 
 if __name__ == "__main__":

@@ -14,4 +14,9 @@ from .metadata import (
         __status__,
     )
 
-from .pipetex2tex import convert as convert_input_commands
+from .resolveinputs import convert as resolve_inputs
+from .resolvepipes import convert as resolve_input_commands
+from .collectfloats import convert as collect_floats
+from .collectfloats import extract_floats
+from .replacebib import convert as replace_bib
+from .replacefigs import convert_and_get_figure_paths as rename_figures_and_get_paths

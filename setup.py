@@ -13,7 +13,7 @@ setup(
     author_email=__email__,
     url='https://github.com/benmaier/submitex',
     license=__license__,
-    description=r"CL tool to convert tex-files that contain \input{|command} with the actual output of these commands.",
+    description=r"Tools and CLIs to make your tex-files submission-ready.",
     long_description='',
     packages=setuptools.find_packages(),
     python_requires='>=3.6',
@@ -38,8 +38,11 @@ setup(
     },
     entry_points = {
           'console_scripts': [
-                  'pipetex2tex = submitex.pipetex2tex:cli',
+                  'resolvepipes = submitex.resolvepipes:cli',
                   'replacebib = submitex.replacebib:cli',
+                  'replacefigs = submitex.replacefigs:cli',
+                  'resolveinputs = submitex.resolveinputs:cli',
+                  'collectfloats = submitex.collectfloats:cli',
               ],
         },
     include_package_data=True,

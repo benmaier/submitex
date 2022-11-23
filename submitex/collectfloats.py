@@ -1,3 +1,8 @@
+"""
+Functions to collect figures and tables and list
+them at the end of the document on their own pages.
+"""
+
 import sys
 import re
 
@@ -24,7 +29,7 @@ def convert(tex):
 
     concat_floats += '\\end{document}\n'
 
-    pattern_enddoc = re.compile(r'\\end\s*{\s*document\s*}')
+    pattern_enddoc = re.compile(r'\\end\s*{\s*document\s*?}')
     newtex = search_pattern_and_replace(newtex, pattern_enddoc,concat_floats)
 
     return newtex
@@ -54,7 +59,8 @@ def extract_floats(tex):
 
 def cli():
 
-    parser = get_default_parser()
+    description = 'Remove all figure- and table-environments from their respective place in the document body and put them on their own page at the end of the document, first figures, then tables.'
+    parser = get_default_parser(description)
     args = get_parsed_args(parser)
     tex = parse_input(args)
 

@@ -1,3 +1,7 @@
+"""
+Functions to replace the bibliography-command
+with the contents of the generated .bbl-file.
+"""
 import sys
 import re
 
@@ -19,18 +23,19 @@ from pathlib import Path
 def convert(tex,bib):
 
     # delete \bibliographystyle{...}
-    pattern_style = re.compile(r'\\bibliographystyle{.*?}')
+    pattern_style = re.compile(r'\\bibliographystyle\s*{.*?}')
     tex = search_pattern_and_replace(tex, pattern_style, '')
 
     # replace \bibliography{} with the text in parameter `bib`
-    pattern_bib = re.compile(r'\\bibliography{.*?}')
+    pattern_bib = re.compile(r'\\bibliography\s*{.*?}')
     tex = search_pattern_and_replace(tex, pattern_bib, bib)
 
     return tex
 
 def cli():
 
-    parser = get_default_parser()
+    description = r'Put the content of the bbl-file into the section where previouly laid `\biblipgraphystyle{...}\bibliography{filename}`'
+    parser = get_default_parser(description)
     parser.add_argument('-b','--bib',
                         type=str,
                         default=None,
@@ -58,7 +63,6 @@ def cli():
     with open(fn_bib,'r',encoding=args.enc) as f:
         bib = f.read()
 
-
     with open(fn+'.tex','r',encoding=args.enc) as f:
         tex = f.read()
 
@@ -66,13 +70,14 @@ def cli():
     write_output(converted)
 
 if __name__ == "__main__":
-    tex = r"""%\bibliographystyle{deimuddi}
+    tex = r"""%\bibliographystyle {deimuddi}
     \bibliographystyle{deinemudder}
+    \bibliographystyle {deinemudder}
     %\bibliographystyle{deimuddi}
     %\bibliography{luemmel.bib}
     abc\bibliography{luemmel.bib}def
 
-    \bibliography{luemmel.bib}
+    \bibliography {luemmel.bib}
     """
     bib = r"""
     \begin{thebibliography}

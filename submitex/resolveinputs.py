@@ -1,3 +1,8 @@
+"""
+Functions to find all input commands and replace
+them with the content of the respective files.
+"""
+
 import sys
 import re
 from pathlib import Path
@@ -10,15 +15,18 @@ from submitex.clitools import (
     )
 from submitex.tools import (
         iterate_matches,
+        search_pattern_and_replace,
     )
 
 def _extract_filepath_from_within_brackets(text):
 
-    print(text)
     before, fn = text.split('{')
     fn = fn[:-1]
 
-    return Path(fn.strip())
+    fn = Path(fn.strip())
+    if fn.suffix == '' and not fn.exists():
+        fn = Path( str(fn) + '.tex')
+    return fn
 
 def _read_file_content(fn,enc='utf-8'):
     with open(fn,'r',encoding=enc) as f:
@@ -68,9 +76,10 @@ def convert(tex):
             fp = _extract_filepath_from_within_brackets(this_match)
             try:
                 output = _read_file_content(fp)
-                newtex = newtex.replace(this_match, output)
             except FileNotFoundError:
-                pass
+                continue
+            newtex = search_pattern_and_replace(newtex, re.compile(re.escape(this_match)), output)
+
 
 
 
@@ -78,7 +87,8 @@ def convert(tex):
 
 
 def cli():
-    parser = get_default_parser()
+    description = 'Replace `\input{filename}` with the content of `filename`'
+    parser = get_default_parser(description)
     args = get_parsed_args(parser)
     tex = parse_input(args)
 

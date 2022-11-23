@@ -26,12 +26,12 @@ def parse_input(args):
             s = f.read()
     return s
 
-def get_default_parser():
+def get_default_parser(description):
     """
     Returns an argparse.ArgumentParser object
     with two default arguments (filename and enc(oding))
     """
-    parser = argparse.ArgumentParser(description='Convert \input{|command} to the output of command.')
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument('filename', type=str, nargs='?',
                         help='Files to convert',default=None)
     parser.add_argument('-e','--enc',

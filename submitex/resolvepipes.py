@@ -1,3 +1,8 @@
+"""
+Functions to iterate all piped input-commands,
+run them, and replace their evocation with the
+respective output.
+"""
 import sys
 import re
 from subprocess import Popen, PIPE
@@ -9,6 +14,7 @@ from submitex.clitools import (
     )
 from submitex.tools import (
         iterate_matches,
+        search_pattern_and_replace,
     )
 
 def _extract_command_from_within_brackets(text):
@@ -103,7 +109,7 @@ def convert(tex):
                 err += "====================================\n\n"
                 sys.stderr.write(err)
             else:
-                newtex = newtex.replace(this_match, output)
+                newtex = search_pattern_and_replace(newtex, re.compile(re.escape(this_match)), output)
 
             found_matches.add(this_match)
 
@@ -115,7 +121,8 @@ def convert(tex):
 
 
 def cli():
-    parser = get_default_parser()
+    description = r'Convert \input{|command} to the output of `command`.'
+    parser = get_default_parser(description)
     args = get_parsed_args(parser)
     tex = parse_input(args)
 
