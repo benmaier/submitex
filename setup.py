@@ -28,6 +28,7 @@ setup(
                  'Programming Language :: Python :: 3.9',
                  'Programming Language :: Python :: 3.10',
                  'Programming Language :: Python :: 3.11',
+                 'Programming Language :: Python :: 3.12',
                  ],
     project_urls={
         'Documentation': 'http://submitex.benmaier.org',
@@ -43,6 +44,7 @@ setup(
                   'replacefigs = submitex.replacefigs:cli',
                   'resolveinputs = submitex.resolveinputs:cli',
                   'collectfloats = submitex.collectfloats:cli',
+                  'removecomments = submitex.removecomments:cli',
               ],
         },
     include_package_data=True,

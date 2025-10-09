@@ -28,11 +28,11 @@ from math import log10
 
 def get_next_figure_range(tex,pos):
 
-    begin_figure = re.compile(r'\\begin\s*{\s*figure\s*?}')
+    begin_figure = re.compile(r'\\begin\s*{\s*figure[\s\*]*?}')
     match_begin = begin_figure.search(tex,pos=pos)
     if match_begin is None:
         return None
-    end_figure = re.compile(r'\\end\s*{\s*figure\s*?}')
+    end_figure = re.compile(r'\\end\s*{\s*figure[\s\*]*?}')
     match_end = end_figure.search(tex,pos=match_begin.span()[-1])
     if match_end is None:
         return None
@@ -96,7 +96,7 @@ def _count_occ(tex,pattern):
     return len([*iterate_matches(tex, pattern)])
 
 def _count_figures(tex):
-    pattern = re.compile(r'\\begin\s*{\s*figure\s*?}')
+    pattern = re.compile(r'\\begin\s*{\s*figure[\s\*]*?}')
     return _count_occ(tex, pattern)
 
 def _count_includegraphics(tex):
@@ -153,7 +153,7 @@ def clone_figures(fig_paths,fileendings=['.pdf','.png','.eps','.jpg','.jpeg'],de
 
 def cli():
 
-    description = 'Rename all figure files in the `\includegraphics`-environment to generic enumerated names and copy the respective files with the new names to top-level.'
+    description = r'Rename all figure files in the `\includegraphics`-environment to generic enumerated names and copy the respective files with the new names to top-level.'
     parser = get_default_parser(description)
     parser.add_argument('-d','--dontcopyfigs',
                         action='store_true',
@@ -198,6 +198,16 @@ if __name__ == "__main__":
             \begin{figure}
                     \includegraphics[width=\textwidth]{figures/result2}
             \end{figure}
+
+            \begin{figure}[p]
+                    \includegraphics[width=\textwidth]{figures/result3.pdf} \includegraphics{b}
+            \end{figure}
+
+            \begin{figure*}[p]
+                    \includegraphics[width=\textwidth]{figures/result4.pdf} \includegraphics{c}
+            \end{figure*}
+
+
 
             \begin{figure}
     """)
