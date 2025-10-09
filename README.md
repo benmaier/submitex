@@ -15,9 +15,6 @@ For instance for `manuscript.tex` with bibtex-generated `manuscript.bbl`:
 
 Check out the [cookbook section](https://github.com/benmaier/submitex/tree/main/cookbook) or further below.
 
-## Workflow for the arXiv
-
-
 
 ## Modules/CLIs
 

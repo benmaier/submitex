@@ -25,9 +25,6 @@ Check out the `cookbook
 section <https://github.com/benmaier/submitex/tree/main/cookbook>`__ or
 further below.
 
-Workflow for the arXiv
-----------------------
-
 Modules/CLIs
 ------------
 
@@ -65,8 +62,6 @@ command line.
 |                                 | a single line on white-space lines. Squash         |
 |                                 | white-space lines to a single line.                |
 +---------------------------------+----------------------------------------------------+
-
-.. _workflow-for-the-arxiv-1:
 
 Workflow for the arXiv
 ----------------------
