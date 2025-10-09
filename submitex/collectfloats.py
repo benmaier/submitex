@@ -40,8 +40,8 @@ def extract_floats(tex):
     https://regexr.com/72slr
     https://regexr.com/72smm
     """
-    fig_pattern = re.compile(r"\\begin\s*{\s*figure\s*}(.|\n)*?\\end\s*{\s*figure\s*}")
-    table_pattern = re.compile(r"\\begin\s*{\s*table\s*}(.|\n)*?\\end\s*{\s*table\s*}")
+    fig_pattern = re.compile(r"\\begin\s*{\s*figure[\s\*]*}(.|\n)*?\\end\s*{\s*figure[\s\*]*}")
+    table_pattern = re.compile(r"\\begin\s*{\s*table[\s\*]*}(.|\n)*?\\end\s*{\s*table[\s\*]*}")
 
     newtex = str(tex)
     figures = []
@@ -84,8 +84,16 @@ if __name__ == "__main__":
 
             \begin{table}
                   \begin{tabulate}
+                    yello
                   \end{tabulate}
             \end{table}
+
+            \begin{table*}
+                  \begin{tabulate}
+                    hallo :D
+                  \end{tabulate}
+            \end{table*}
+
 
 
                   This is another paragraph
@@ -94,6 +102,11 @@ if __name__ == "__main__":
                     \includegraphics[width=\textwidth]{figures/result2}
             \end{figure}
 
+            \begin{figure*}
+                    \includegraphics[width=\textwidth]{figures/result3}
+            \end{figure*}
+
+            %\begin{figure}
             %\begin{figure}
             %        \includegraphics[width=\textwidth]{figures/result2}
             %\end{figure}
