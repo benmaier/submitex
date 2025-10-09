@@ -15,6 +15,10 @@ For instance for `manuscript.tex` with bibtex-generated `manuscript.bbl`:
 
 Check out the [cookbook section](https://github.com/benmaier/submitex/tree/main/cookbook) or further below.
 
+## Workflow for the arXiv
+
+
+
 ## Modules/CLIs
 
 Functionality is given by functions in the respective `submitex.modulename`, e.g. `submitex.replacefigs`.
@@ -28,8 +32,88 @@ The same modulename can be used to evoke the functionality from the command line
 | replacebib | Put the content of the bbl-file into the section where previously laid `\bibliographystyle{...}\bibliography{filename}` |
 | resolveinputs | Replace `\input{filename}` with the content of `filename` |
 | resolvepipes | Replace `\input{\|command}` with the output of the process `command` |
+| removecomments | Remove comments (beginning with unescaped `%`) on non-whitespace lines, squash lines comments to a single line on white-space lines. Squash white-space lines to a single line. |
 
-### Python examples
+## Workflow for the arXiv
+
+For the arxiv, it's nice to copy all figures to top-level, resolve all inputs, replace the bibliography with the bbl file, and remove comments.
+Then in the end, you want a zip that you can upload. What follows is a Makefile that takes care of that.
+
+Make sure to have [diff-pdf](https://github.com/vslavik/diff-pdf) installed! On MacOS:
+
+    brew install diff-pdf
+
+Here is the Makefile:
+
+```Makefile
+# ============================
+# Configurable parameters
+# ============================
+
+# Input directory (copied from Overleaf)
+INPUT_DIR := /path/to/manuscript/directory
+
+# Local working directories
+PAPER_DIR := paper
+ARXIV_DIR := arxiv
+ARXIV_TEST := arxiv_test
+
+# Manuscript base name (without .tex)
+MAIN := main
+
+# Tool to open a file (on Mac, just `open`)
+OPEN := open
+
+# ============================
+# Targets
+# ============================
+
+default: init arxiv
+
+init: clean copy latex
+
+arxiv: processtex test zip
+
+latex:
+	cd $(PAPER_DIR); pdflatex $(MAIN); bibtex $(MAIN); pdflatex $(MAIN); pdflatex $(MAIN)
+
+processtex:
+	cd $(PAPER_DIR); replacebib $(MAIN) | resolveinputs | replacefigs | removecomments > $(MAIN)_for_arxiv.tex
+	mkdir -p $(ARXIV_DIR)
+	mkdir -p $(ARXIV_TEST)
+	cp ./$(PAPER_DIR)/$(MAIN)_for_arxiv.tex ./$(ARXIV_DIR)
+	cp ./$(PAPER_DIR)/Fig* ./$(ARXIV_DIR)
+	cp ./$(PAPER_DIR)/$(MAIN)_for_arxiv.tex ./$(ARXIV_TEST)
+	cp ./$(PAPER_DIR)/Fig* ./$(ARXIV_TEST)
+
+copy:
+	cp -r $(INPUT_DIR)/ ./$(PAPER_DIR)
+
+clean:
+	rm -rf ./$(ARXIV_DIR)
+	rm -rf ./$(ARXIV_TEST)
+	rm -rf ./$(PAPER_DIR)
+	rm -f texput.log arxiv.zip diff.pdf
+
+softclean:
+	rm -rf ./$(ARXIV_TEST)
+	rm -rf ./$(PAPER_DIR)
+	rm -f texput.log diff.pdf
+
+zip:
+	zip -r arxiv.zip ./$(ARXIV_DIR)
+
+test:
+	cd $(ARXIV_TEST) &&\
+			rm -f $(MAIN)_for_arxiv.pdf &&\
+			pdflatex $(MAIN)_for_arxiv.tex &&\
+			pdflatex $(MAIN)_for_arxiv.tex
+	rm -f $(ARXIV_TEST)/$(MAIN)_for_arxiv
+	diff-pdf $(ARXIV_TEST)/$(MAIN)_for_arxiv.pdf $(PAPER_DIR)/$(MAIN).pdf --output-diff=diff.pdf --skip-identical
+	$(OPEN) diff.pdf
+```
+
+## Python examples
 
 #### replacefigs
 
@@ -179,6 +263,44 @@ Output:
     out   : There's $      62$ files/directories in your user directory.
 
 
+#### removecomments
+
+```python
+import submitex.removecomments as rc
+sample = r"""
+code % comment
+code with escaped \% percent stays
+path with backslashes \\% not a comment
+line with no comment
+
+
+
+next line % another comment
+
+\includegraphics[width=0.5\textwidth]{Fig35.pdf} % original file: example.pdf
+   %
+%
+%
+"""
+print(rc.clean_text(sample))
+```
+
+Output:
+```
+
+code
+code with escaped \% percent stays
+path with backslashes \\
+line with no comment
+
+next line
+
+\includegraphics[width=0.5\textwidth]{Fig35.pdf}
+%
+
+```
+
+
 
 ### CLI usage
 
@@ -197,7 +319,7 @@ the procedure assumes that both `oldmanuscript.tex` and `oldmanuscript.bbl` exis
 
 Note that that means you can pipe several or all of the commands together, for instance like so:
 
-    replacebib manuscript | replacefigs | collectfloats | resolveinputs | resolvepipes > newmanuscript.tex
+    replacebib manuscript | replacefigs | collectfloats | resolveinputs | resolvepipes | removecomments > newmanuscript.tex
 
 #### replacefigs
 
