@@ -25,6 +25,9 @@ Check out the `cookbook
 section <https://github.com/benmaier/submitex/tree/main/cookbook>`__ or
 further below.
 
+Workflow for the arXiv
+----------------------
+
 Modules/CLIs
 ------------
 
@@ -34,38 +37,124 @@ Functionality is given by functions in the respective
 The same modulename can be used to evoke the functionality from the
 command line.
 
-+---------------------------------+------------------------------------+
-| module/CLI                      | description                        |
-+=================================+====================================+
-| replacefigs                     | Rename all figure files in the     |
-|                                 | ``\includegraphics``-environment   |
-|                                 | to generic enumerated names and    |
-|                                 | copy the respective files with the |
-|                                 | new names to top-level.            |
-+---------------------------------+------------------------------------+
-| collectfloats                   | Remove all figure- and             |
-|                                 | table-environments from their      |
-|                                 | respective place in the document   |
-|                                 | body and put them on their own     |
-|                                 | page at the end of the document,   |
-|                                 | first figures, then tables.        |
-+---------------------------------+------------------------------------+
-| replacebib                      | Put the content of the bbl-file    |
-|                                 | into the section where previously  |
-|                                 | laid                               |
-|                                 | ``\bibliographys                   |
-|                                 | tyle{...}\bibliography{filename}`` |
-+---------------------------------+------------------------------------+
-| resolveinputs                   | Replace ``\input{filename}`` with  |
-|                                 | the content of ``filename``        |
-+---------------------------------+------------------------------------+
-| resolvepipes                    | Replace ``\input{\|command}`` with |
-|                                 | the output of the process          |
-|                                 | ``command``                        |
-+---------------------------------+------------------------------------+
++---------------------------------+----------------------------------------------------+
+| module/CLI                      | description                                        |
++=================================+====================================================+
+| replacefigs                     | Rename all figure files in the                     |
+|                                 | ``\includegraphics``-environment to generic        |
+|                                 | enumerated names and copy the respective files     |
+|                                 | with the new names to top-level.                   |
++---------------------------------+----------------------------------------------------+
+| collectfloats                   | Remove all figure- and table-environments from     |
+|                                 | their respective place in the document body and    |
+|                                 | put them on their own page at the end of the       |
+|                                 | document, first figures, then tables.              |
++---------------------------------+----------------------------------------------------+
+| replacebib                      | Put the content of the bbl-file into the section   |
+|                                 | where previously laid                              |
+|                                 | ``\bibliographystyle{...}\bibliography{filename}`` |
++---------------------------------+----------------------------------------------------+
+| resolveinputs                   | Replace ``\input{filename}`` with the content of   |
+|                                 | ``filename``                                       |
++---------------------------------+----------------------------------------------------+
+| resolvepipes                    | Replace ``\input{\|command}`` with the output of   |
+|                                 | the process ``command``                            |
++---------------------------------+----------------------------------------------------+
+| removecomments                  | Remove comments (beginning with unescaped ``%``)   |
+|                                 | on non-whitespace lines, squash lines comments to  |
+|                                 | a single line on white-space lines. Squash         |
+|                                 | white-space lines to a single line.                |
++---------------------------------+----------------------------------------------------+
+
+.. _workflow-for-the-arxiv-1:
+
+Workflow for the arXiv
+----------------------
+
+For the arxiv, it's nice to copy all figures to top-level, resolve all
+inputs, replace the bibliography with the bbl file, and remove comments.
+Then in the end, you want a zip that you can upload. What follows is a
+Makefile that takes care of that.
+
+Make sure to have `diff-pdf <https://github.com/vslavik/diff-pdf>`__
+installed! On MacOS:
+
+.. code:: bash
+
+   brew install diff-pdf
+
+Here is the Makefile:
+
+.. code:: makefile
+
+   # ============================
+   # Configurable parameters
+   # ============================
+
+   # Input directory (copied from Overleaf)
+   INPUT_DIR := /path/to/manuscript/directory
+
+   # Local working directories
+   PAPER_DIR := paper
+   ARXIV_DIR := arxiv
+   ARXIV_TEST := arxiv_test
+
+   # Manuscript base name (without .tex)
+   MAIN := main
+
+   # Tool to open a file (on Mac, just `open`)
+   OPEN := open
+
+   # ============================
+   # Targets
+   # ============================
+
+   default: init arxiv
+
+   init: clean copy latex
+
+   arxiv: processtex test zip
+
+   latex:
+       cd $(PAPER_DIR); pdflatex $(MAIN); bibtex $(MAIN); pdflatex $(MAIN); pdflatex $(MAIN)
+
+   processtex:
+       cd $(PAPER_DIR); replacebib $(MAIN) | resolveinputs | replacefigs | removecomments > $(MAIN)_for_arxiv.tex
+       mkdir -p $(ARXIV_DIR)
+       mkdir -p $(ARXIV_TEST)
+       cp ./$(PAPER_DIR)/$(MAIN)_for_arxiv.tex ./$(ARXIV_DIR)
+       cp ./$(PAPER_DIR)/Fig* ./$(ARXIV_DIR)
+       cp ./$(PAPER_DIR)/$(MAIN)_for_arxiv.tex ./$(ARXIV_TEST)
+       cp ./$(PAPER_DIR)/Fig* ./$(ARXIV_TEST)
+
+   copy:
+       cp -r $(INPUT_DIR)/ ./$(PAPER_DIR)
+
+   clean:
+       rm -rf ./$(ARXIV_DIR)
+       rm -rf ./$(ARXIV_TEST)
+       rm -rf ./$(PAPER_DIR)
+       rm -f texput.log arxiv.zip diff.pdf
+
+   softclean:
+       rm -rf ./$(ARXIV_TEST)
+       rm -rf ./$(PAPER_DIR)
+       rm -f texput.log diff.pdf
+
+   zip:
+       zip -r arxiv.zip ./$(ARXIV_DIR)
+
+   test:
+       cd $(ARXIV_TEST) &&\
+               rm -f $(MAIN)_for_arxiv.pdf &&\
+               pdflatex $(MAIN)_for_arxiv.tex &&\
+               pdflatex $(MAIN)_for_arxiv.tex
+       rm -f $(ARXIV_TEST)/$(MAIN)_for_arxiv
+       diff-pdf $(ARXIV_TEST)/$(MAIN)_for_arxiv.pdf $(PAPER_DIR)/$(MAIN).pdf --output-diff=diff.pdf --skip-identical
+       $(OPEN) diff.pdf
 
 Python examples
-~~~~~~~~~~~~~~~
+---------------
 
 replacefigs
 ^^^^^^^^^^^
@@ -207,11 +296,11 @@ resolvepipes
 
    import submitex.resolvepipes as rp
 
-   tex = "There's \inp{|python -c 'print(int(24*60*60*365.25))'} seconds in a year."
+   tex = r"There's \inp{|python -c 'print(int(24*60*60*365.25))'} seconds in a year."
    print("source:", tex)
    print("out   :", rp.convert(tex), '\n')
 
-   tex = "There's $\input { | ls -al ~ | wc -l }$ files/directories in your user directory."
+   tex = r"There's $\input { | ls -al ~ | wc -l }$ files/directories in your user directory."
    print("source:", tex)
    print("out   :", rp.convert(tex))
 
@@ -224,6 +313,44 @@ Output:
 
    source: There's $\input { | ls -al ~ | wc -l }$ files/directories in your user directory.
    out   : There's $      62$ files/directories in your user directory.
+
+removecomments
+^^^^^^^^^^^^^^
+
+.. code:: python
+
+   import submitex.removecomments as rc
+   sample = r"""
+   code % comment
+   code with escaped \% percent stays
+   path with backslashes \\% not a comment
+   line with no comment
+
+
+
+   next line % another comment
+
+   \includegraphics[width=0.5\textwidth]{Fig35.pdf} % original file: example.pdf
+      %
+   %
+   %
+   """
+   print(rc.clean_text(sample))
+
+Output:
+
+.. code:: bash
+
+
+   code
+   code with escaped \% percent stays
+   path with backslashes \\
+   line with no comment
+
+   next line
+
+   \includegraphics[width=0.5\textwidth]{Fig35.pdf}
+   %
 
 CLI usage
 ~~~~~~~~~
@@ -255,7 +382,7 @@ together, for instance like so:
 
 .. code:: bash
 
-   replacebib manuscript | replacefigs | collectfloats | resolveinputs | resolvepipes > newmanuscript.tex
+   replacebib manuscript | replacefigs | collectfloats | resolveinputs | resolvepipes | removecomments > newmanuscript.tex
 
 .. _replacefigs-1:
 
@@ -367,6 +494,31 @@ Example:
 
    resolvepipes manuscript.tex > manuscript_with_executed_commands.tex
    cat manuscript.tex | resolvepipes > manuscript_cmds.tex
+
+.. _removecomments-1:
+
+removecomments
+^^^^^^^^^^^^^^
+
+.. code:: bash
+
+   usage: removecomments [-h] [-e ENC] [filename]
+
+   Replace all comments with an empty string and squash all empty lines to one empty line
+
+   positional arguments:
+     filename           Files to convert
+
+   options:
+     -h, --help         show this help message and exit
+     -e ENC, --enc ENC  encoding
+
+Example:
+
+.. code:: bash
+
+   removecomments manuscript.tex > manuscript_with_removed_comments.tex
+   cat manuscript.tex | removecomments > manuscript_clean.tex
 
 Dependencies
 ------------

@@ -1,4 +1,4 @@
-PKG=pipetex2tex
+PKG=submitex
 PYTHON=python
 PIP=pip
 

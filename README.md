@@ -244,11 +244,11 @@ Output:
 ```python
 import submitex.resolvepipes as rp
 
-tex = "There's \inp{|python -c 'print(int(24*60*60*365.25))'} seconds in a year."
+tex = r"There's \inp{|python -c 'print(int(24*60*60*365.25))'} seconds in a year."
 print("source:", tex)
 print("out   :", rp.convert(tex), '\n')
 
-tex = "There's $\input { | ls -al ~ | wc -l }$ files/directories in your user directory."
+tex = r"There's $\input { | ls -al ~ | wc -l }$ files/directories in your user directory."
 print("source:", tex)
 print("out   :", rp.convert(tex))
 
@@ -406,6 +406,23 @@ Example:
     resolvepipes manuscript.tex > manuscript_with_executed_commands.tex
     cat manuscript.tex | resolvepipes > manuscript_cmds.tex
 
+#### removecomments
+
+    usage: removecomments [-h] [-e ENC] [filename]
+    
+    Replace all comments with an empty string and squash all empty lines to one empty line
+    
+    positional arguments:
+      filename           Files to convert
+    
+    options:
+      -h, --help         show this help message and exit
+      -e ENC, --enc ENC  encoding
+
+Example:
+
+    removecomments manuscript.tex > manuscript_with_removed_comments.tex
+    cat manuscript.tex | removecomments > manuscript_clean.tex
 
 ## Dependencies
 
