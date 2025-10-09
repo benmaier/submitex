@@ -20,7 +20,7 @@ def remove_unescaped_percent_comments(text: str) -> str:
     """
     # ^((?:[^\\]|\\{2})*?)  -> capture the shortest prefix that ends before the first unescaped %
     # %.*$                  -> from that % to end of line
-    return re.sub(r'^((?:[^\\]|\\{2})*?)%.*$', r'\1', text, flags=re.M)
+    return re.sub(r'^((?:\\.|[^%\\])*)%.*$', r'\1', text, flags=re.M)
 
 def collapse_empty_lines(text: str) -> str:
     """
@@ -64,6 +64,8 @@ if __name__ == "__main__":
 
 
                  next line % another comment
+
+    \includegraphics[width=0.5\textwidth]{Fig35.pdf} % original file: example.pdf
                """
     print(clean_text(sample))
 
